@@ -247,7 +247,7 @@ dev.off()
 
 
 
-
+#making a copynumber plot overlaying the different samples from sampleset T12.
 df_Normal <- data.frame("Chromosome" = ratio_frame_clean$Chromosome,
                      "GenomicPosition" = ratio_frame_clean$GenomicPosition,
                      "CopyNumber" = ratio_frame_clean$`T12 Normal_Copynumber`,
