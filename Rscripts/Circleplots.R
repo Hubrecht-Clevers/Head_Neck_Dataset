@@ -1,14 +1,19 @@
 library(circlize)
 
 # function to make a circleplot with genomic info, such as structual variants, SNPS and copynumber variations.
+# this function can use a vcf_file as input, as well as copynumber info from the FREEC-package.
+# Structual variants can be inputted straight from the MANTA, structual variant caller. 
+# Genomes can be selected, so far only hg38 will give you an output.
+# Please specify whether your sample was sequenced WGS or WES and for correct copy number calculations, sex info is needed.
 make_circos_plot <- function(snv_in, ratiofile_in, sv_in = NULL, genome = "hg38", samplename, outputfile, WES = F, SEX="M"){
   # get all the SNVs from the file and make them into a table
   circos.clear()
   snv_file_info <- file.info(snv_in)
+  # checking to see if there are snps in your vcf-file.
   test1 <- system(paste0("cat ", snv_in, " | wc -l"), intern = T)
   test2 <- system(paste0("cat ", snv_in, " | grep ^# | wc -l"), intern = T)
   if (test1 != test2) {
-    
+    # convert your vcf file to a workable table
     snv_tmp <- read.table(snv_in,comment.char="#")
     snv <- as.data.frame(cbind(paste0("chr",as.character(snv_tmp[,1])), snv_tmp[,2], snv_tmp[,2]+1))
     colnames(snv) <- c("CHROM", "START", "END")
@@ -37,6 +42,7 @@ make_circos_plot <- function(snv_in, ratiofile_in, sv_in = NULL, genome = "hg38"
       cnv2$CopyNumber[which(cnv2$Chromosome == "Y")] <- cnv2$CopyNumber[which(cnv2$Chromosome == "Y")]*2
     }
   }
+  # if the data is from WGS, it will use bins.
   if (!WES) {
     cnv2 <- data.frame("Chromosome" = cnv$Chromosome, "Start" = cnv$Start, "End" = unlist(lapply(cnv$Start, function(x){x+999})), 
                        "Ratio" = cnv$Ratio, "CopyNumber" = cnv$CopyNumber)
@@ -186,3 +192,5 @@ make_circos_plot <- function(snv_in, ratiofile_in, sv_in = NULL, genome = "hg38"
   svTable <- NULL
 }
 
+#usage:
+make_circos_plot("VCF_file_input", "RATIO_file_input", "SV_MANTA_input", "GENOME_VERSION", "NAME", "OUTPUT_PDF_FILENAME", "WES-Y/N", "SEX")
